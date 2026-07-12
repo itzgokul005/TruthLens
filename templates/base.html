@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <title>{% block title %}TruthLens.AI — Forensic Fact-Checking Hub{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind CSS (utility-class engine used identically to the original Tailwind v4 setup) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
+              display: ["Space Grotesk", "sans-serif"],
+              mono: ["JetBrains Mono", "monospace"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Lucide icon set — identical icon family to the original's lucide-react -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}" />
+    {% block extra_head %}{% endblock %}
+  </head>
+  <body class="font-sans antialiased min-h-screen bg-[#f9fafb] dark:bg-[#030712] text-slate-900 dark:text-zinc-100 transition-colors duration-200">
+    {% block content %}{% endblock %}
+
+    <script>
+      // Re-render every Lucide <i data-lucide="..."> tag on the page. Must be
+      // called again any time new markup is injected dynamically (result
+      // panels, history cards, dashboard, etc.) — app.js calls this after
+      // every DOM injection, exactly analogous to how lucide-react re-renders
+      // icons whenever React re-renders a component.
+      window.refreshIcons = function () {
+        if (window.lucide) lucide.createIcons();
+      };
+      window.refreshIcons();
+    </script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

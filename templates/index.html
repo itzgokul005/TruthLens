@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<!--
+  Port of src/App.tsx. React's useState-driven `currentTab` conditional
+  rendering becomes: every tab section rendered into the DOM up front,
+  with only one visible at a time via a `hidden` class toggle in
+  static/js/main.js (see showTab()) — functionally identical single-page
+  behavior, no URL change, no full reload, exactly like the original.
+-->
+<div class="min-h-screen bg-[#f9fafb] dark:bg-[#030712] text-slate-900 dark:text-zinc-100 transition-colors duration-200">
+
+  <!-- Decorative Global Ambient Circles -->
+  <div class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-0 pointer-events-none z-0">
+    <div class="absolute top-12 left-10 w-96 h-96 rounded-full bg-blue-500/5 dark:bg-blue-600/5 blur-[100px]"></div>
+    <div class="absolute top-48 right-10 w-[450px] h-[450px] rounded-full bg-purple-500/5 dark:bg-purple-600/5 blur-[120px]"></div>
+  </div>
+
+  {% include "partials/navbar.html" %}
+
+  <main id="app-routing-main-stage" class="relative z-10">
+    <div id="tab-overview">{% include "partials/landing.html" %}</div>
+    <div id="tab-text-mode" class="hidden">{% include "partials/article_analysis.html" %}</div>
+    <div id="tab-image-mode" class="hidden">{% include "partials/image_verification.html" %}</div>
+    <div id="tab-dashboard" class="hidden">{% include "partials/dashboard.html" %}</div>
+    <div id="tab-history" class="hidden">{% include "partials/history.html" %}</div>
+  </main>
+
+  {% include "partials/auth_modal.html" %}
+
+</div>
+
+<!-- Server-rendered bootstrap data: initial history ledger + current user session, so
+     main.js starts from the same state the original app fetched on mount via
+     GET /api/history and GET /auth/me, without an extra round trip. -->
+<script>
+  window.__TRUTHLENS_BOOTSTRAP__ = {
+    history: {{ initial_history | tojson }},
+    user: {{ current_user_json | tojson }}
+  };
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}

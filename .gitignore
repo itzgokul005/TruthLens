@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Flask / instance data
+instance/
+.env
+*.db
+*.sqlite
+*.sqlite3
+
+# Migrations metadata (keep migrations/versions if you generate them; the
+# scaffold itself is created locally via `flask db init`)
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log

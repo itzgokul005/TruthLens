@@ -1,0 +1,106 @@
+<!--
+  Port of src/components/AuthModal.tsx.
+  Tab state (login/signup/forgot), validation, and submission now talk to
+  real endpoints (/auth/login, /auth/signup, /auth/forgot-password,
+  /auth/google) instead of the original's fake setTimeout() — see
+  static/js/main.js (initAuthModal). Every visible string, layout, and
+  class is preserved exactly.
+-->
+<div id="auth-modal-screen" class="hidden fixed inset-0 z-50 items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+  <div id="auth-card-body" class="relative w-full max-w-md overflow-hidden rounded-2xl glass-effect-strong border border-white/20 dark:border-white/5 shadow-2xl p-6 sm:p-8 animate-in fade-in zoom-in duration-200">
+    <!-- Background Visual Flare -->
+    <div class="absolute -top-12 -left-12 w-32 h-32 rounded-full bg-blue-500/10 blur-2xl pointer-events-none"></div>
+    <div class="absolute -bottom-12 -right-12 w-32 h-32 rounded-full bg-purple-500/10 blur-2xl pointer-events-none"></div>
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h3 id="auth-modal-title" class="font-display text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">Welcome to TruthLens</h3>
+        <p id="auth-modal-subtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Access your personal analytical logs and report suites.</p>
+      </div>
+      <button id="close-auth-modal" class="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 hover:text-slate-700 transition">
+        <i data-lucide="x" style="width:18px;height:18px"></i>
+      </button>
+    </div>
+
+    <!-- Toggle tabs -->
+    <div id="auth-toggle-tabs" class="flex bg-slate-100 dark:bg-slate-800/80 p-1 rounded-lg mb-6">
+      <button id="auth-login-tab" class="flex-1 py-1.5 text-xs font-semibold rounded-md transition bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-white">Access Portal</button>
+      <button id="auth-signup-tab" class="flex-1 py-1.5 text-xs font-semibold rounded-md transition text-slate-500 dark:text-slate-400">Create Account</button>
+    </div>
+
+    <!-- Global Alert Banners -->
+    <div id="auth-error-banner" class="hidden items-start gap-2.5 p-3 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-300 text-xs mb-4">
+      <i data-lucide="alert-circle" class="shrink-0 mt-0.5" style="width:16px;height:16px"></i>
+      <span id="auth-error-text"></span>
+    </div>
+    <div id="auth-success-banner" class="hidden items-start gap-2.5 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs mb-4">
+      <i data-lucide="check" class="shrink-0 mt-0.5" style="width:16px;height:16px"></i>
+      <span id="auth-success-text"></span>
+    </div>
+
+    <!-- Native Email Forms -->
+    <form id="auth-form" class="space-y-4">
+      <div id="auth-name-field" class="hidden">
+        <label class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Your Full Name</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 dark:text-slate-500">
+            <i data-lucide="user" style="width:15px;height:15px"></i>
+          </span>
+          <input id="auth-input-name" type="text" placeholder="e.g. John Doe" class="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900 dark:text-white" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-slate-600 dark:text-slate-300 mb-1">Administrative Email</label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 dark:text-slate-500">
+            <i data-lucide="mail" style="width:15px;height:15px"></i>
+          </span>
+          <input id="auth-input-email" type="email" required placeholder="you@domain.com" class="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900 dark:text-white" />
+        </div>
+      </div>
+
+      <div id="auth-password-field">
+        <div class="flex items-center justify-between mb-1">
+          <label class="block text-xs font-medium text-slate-600 dark:text-slate-300">Security Signature Key</label>
+          <button type="button" id="auth-forgot-trigger" class="text-[10px] text-blue-500 hover:underline hover:text-blue-600 dark:text-blue-400">Forgot Password?</button>
+        </div>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400 dark:text-slate-500">
+            <i data-lucide="lock" style="width:15px;height:15px"></i>
+          </span>
+          <input id="auth-input-password" type="password" placeholder="••••••••" class="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900 dark:text-white" />
+        </div>
+      </div>
+
+      <button id="auth-submit-btn" type="submit" class="w-full py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xs font-semibold rounded-lg shadow-md transition-all duration-200 flex items-center justify-center gap-1.5 disabled:opacity-50">
+        <span id="auth-submit-spinner" class="hidden w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+        <span id="auth-submit-label">Sign In Securely</span>
+      </button>
+    </form>
+
+    <!-- Separator / Alternative auth -->
+    <div id="auth-social-block" class="space-y-4 mt-5">
+      <div class="relative flex items-center justify-center">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-slate-200 dark:border-slate-800"></div>
+        </div>
+        <span class="relative px-3 bg-[#e4eefb] dark:bg-[#161f32] text-[10px] text-slate-400 uppercase tracking-wider">Or leverage enterprise auth</span>
+      </div>
+
+      <button id="google-sigin-btn" type="button" class="w-full py-2 bg-white dark:bg-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-medium rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm transition flex items-center justify-center gap-2">
+        <svg class="w-4 h-4" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.91h6.58c-.28 1.48-1.12 2.74-2.38 3.59v2.98h3.84c2.25-2.07 3.7-5.11 3.7-8.41z" />
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.84-2.98c-1.06.71-2.42 1.14-4.09 1.14-3.15 0-5.8-2.13-6.75-5.01H1.42v3.08C3.4 21.09 7.41 24 12 24z" />
+          <path fill="#FBBC05" d="M5.25 14.24a7.21 7.21 0 0 1 0-4.48V6.68H1.42a11.94 11.94 0 0 0 0 10.64l3.83-3.08z" />
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.41 0 3.4 2.91 1.42 6.68l3.83 3.08c.95-2.88 3.6-5.01 6.75-5.01z" />
+        </svg>
+        <span>Verify credentials with Google OAuth</span>
+      </button>
+    </div>
+
+    <!-- Back navigation -->
+    <button id="auth-back-to-login" class="hidden w-full text-center text-xs text-slate-500 hover:text-slate-700 dark:text-slate-400 mt-4 underline">Back to Portal Access</button>
+  </div>
+</div>

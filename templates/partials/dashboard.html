@@ -1,0 +1,9 @@
+<!--
+  Port of src/components/AIDashboard.tsx.
+  Every card, the SVG area chart, and the SVG donut chart are entirely
+  derived from the `history` array (via useMemo in the original), so this
+  partial is just the mount point — static/js/main.js's renderDashboard()
+  rebuilds the full innerHTML from scratch on every visit/history change,
+  exactly mirroring the original's recompute-on-every-render behavior.
+-->
+<div id="ai-dashboard-root" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"></div>
